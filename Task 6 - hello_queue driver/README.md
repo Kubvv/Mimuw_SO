@@ -1,35 +1,77 @@
-Zadanie 6
+ <div role="main"><span id="maincontent"></span><h2>Zadanie 6</h2><div id="intro" class="box py-3 generalbox boxaligncenter"><div class="no-overflow"><p><span style="color:red">Update: 2.06. Zmiany na czerwono (refresh zamienione na restart)</span>.</p>
 
-Biorąc za punkt wyjścia MINIX-owe sterowniki urządzeń umieszczone w katalogu /usr/src/minix/drivers/examples, zaimplementuj sterownik urządzenia /dev/hello_queue działający zgodnie z poniższą specyfikacją.
+<p>Biorąc za punkt wyjścia MINIX-owe sterowniki urządzeń umieszczone w katalogu
+<code>/usr/src/minix/drivers/examples</code>, zaimplementuj sterownik urządzenia
+<code>/dev/hello_queue</code> działający zgodnie z poniższą specyfikacją.</p>
 
-Działanie urządzenia będzie przypominać prymitywna kolejkę z dodatkowymi operacjami.
+<p>Działanie urządzenia będzie przypominać prymitywna kolejkę z dodatkowymi
+operacjami.</p>
 
-W chwili początkowej urządzenie ma dysponować buforem o pojemności DEVICE_SIZE bajtów. Stała ta jest zdefiniowana w dostarczanym przez nas pliku nagłówkowym hello_queue.h. Zastrzegamy możliwość zmiany wartości tej stałej w testach.
+<p>W chwili początkowej urządzenie ma dysponować buforem o pojemności <code>DEVICE_SIZE</code>
+bajtów. Stała ta jest zdefiniowana w dostarczanym przez nas pliku nagłówkowym
+<code>hello_queue.h</code>. Zastrzegamy możliwość zmiany wartości tej stałej w testach.</p>
 
-Pamięć na bufor powinna być rezerwowana (i zwalniana) dynamicznie.
+<p>Pamięć na bufor powinna być rezerwowana (i zwalniana) dynamicznie.</p>
 
-Po uruchomieniu sterownika poleceniem service up … wszystkie elementy bufora mają zostać wypełnione wielokrotnością ciągu kodów ASCII liter x, y, i z. Jeśli wielkość bufora nie jest podzielna przez 3, ostatnie wystąpienie ciągu powinno zostać odpowiednio skrócone.
+<p>Po uruchomieniu sterownika poleceniem <code>service up …</code> wszystkie elementy bufora
+mają zostać wypełnione wielokrotnością ciągu kodów ASCII liter <code>x</code>, <code>y</code>, i <code>z</code>.
+Jeśli wielkość bufora nie jest podzielna przez 3, ostatnie wystąpienie ciągu
+powinno zostać odpowiednio skrócone.</p>
 
-Czytanie z urządzenia za pomocą funkcji read ma powodować odczytanie wskazanej liczby bajtów z początku kolejki. Gdy w kolejce nie znajduje się dostateczna liczba bajtów, należy odpowiednio zredukować wartość parametru polecenia czytania. Odczytane bajty usuwa się z kolejki. Kolejność odczytanych bajtów powinna odpowiadać kolejności, w jakiej bajty te były wkładane do kolejki. Gdy po odczytaniu wskazanego ciągu bajtów bufor będzie zajęty w co najwyżej jednej czwartej, należy zmniejszyć jego rozmiar o połowę. W przypadku wielkości nieparzystej, nowa rozmiar powinien zostać zaokrąglony w dół do wartości całkowitej.
+<p>Czytanie z urządzenia za pomocą funkcji <code>read</code> ma powodować odczytanie wskazanej
+liczby bajtów z początku kolejki. Gdy w kolejce nie znajduje się dostateczna
+liczba bajtów, należy odpowiednio zredukować wartość parametru polecenia
+czytania. Odczytane bajty usuwa się z kolejki. Kolejność odczytanych bajtów
+powinna odpowiadać kolejności, w jakiej bajty te były wkładane do kolejki. Gdy
+po odczytaniu wskazanego ciągu bajtów bufor będzie zajęty w co najwyżej jednej
+czwartej, należy zmniejszyć jego rozmiar o połowę. W przypadku wielkości
+nieparzystej, nowa rozmiar powinien zostać zaokrąglony w dół do wartości
+całkowitej.</p>
 
-Operacja pisania do urządzenia za pomocą funkcji write powoduje zapisanie wskazanego ciągu bajtów na końcu kolejki. Gdy rozmiar bufora nie wystarcza do zapisania wskazanego ciągu, należy pojemność bufora podwajać, aż będzie on wystarczająco duży na zapisanie całego ciągu.
+<p>Operacja pisania do urządzenia za pomocą funkcji <code>write</code> powoduje zapisanie
+wskazanego ciągu bajtów na końcu kolejki. Gdy rozmiar bufora nie wystarcza do
+zapisania wskazanego ciągu, należy pojemność bufora podwajać, aż będzie
+on wystarczająco duży na zapisanie całego ciągu.</p>
 
-Oprócz obsługi operacji czytania i pisania sterownik powinien implementować również operację ioctl pozwalającą na wykonanie następujących komend:
+<p>Oprócz obsługi operacji czytania i pisania sterownik powinien implementować
+również operację <code>ioctl</code> pozwalającą na wykonanie następujących komend:</p>
 
-    HQIOCRES – Przywraca kolejkę do stanu początkowego – bufor powinien być rozmiaru DEVICE_SIZE oraz wypełniony wielokrotnością ciągu x, y, i z.
-    HQIOCSET – Przyjmuje char[MSG_SIZE] i umieszcza przekazany napis w kolejce. Gdy rozmiar bufora jest nie mniejszy niż długość napisu, funkcja podmienia MSG_SIZE znaków z końca kolejki. Jeżeli napis zaś jest dłuższy od aktualnego rozmiaru bufora kolejki, to bufor powinien zostać powiększony tak samo jak podczas pisania do urządzenia, a następnie napis powinien zostać umieszczony w kolejce tak jak w pierwszym przypadku. Po operacji ostatni znak przekazanego napisu powinien znajdować się na końcu kolejki.
-    HQIOCXCH – Przyjmuje char[2] i zamienia wszystkie wystąpienia w kolejce char[0] na char[1].
-    HQIOCDEL – Usuwa co trzeci element z kolejki, zaczynając operację od początku kolejki (numerując elementy kolejki od 1, usuwamy elementy o numerach 3, 6, 9, …). Rozmiar bufora powinien pozostać bez zmian.
+<ul>
+<li><code>HQIOCRES</code> – Przywraca kolejkę do stanu początkowego – bufor powinien być
+rozmiaru <code>DEVICE_SIZE</code> oraz wypełniony wielokrotnością ciągu <code>x</code>, <code>y</code>, i <code>z</code>.</li>
+<li><code>HQIOCSET</code> – Przyjmuje <code>char[MSG_SIZE]</code> i umieszcza przekazany napis
+w kolejce. Gdy rozmiar bufora jest nie mniejszy niż długość napisu, funkcja
+podmienia <code>MSG_SIZE</code> znaków z końca kolejki. Jeżeli napis zaś jest dłuższy od
+aktualnego rozmiaru bufora kolejki, to bufor powinien zostać powiększony tak
+samo jak podczas pisania do urządzenia, a następnie napis powinien zostać
+umieszczony w kolejce tak jak w pierwszym przypadku. Po operacji ostatni znak
+przekazanego napisu powinien znajdować się na końcu kolejki.</li>
+<li><code>HQIOCXCH</code> – Przyjmuje <code>char[2]</code> i zamienia wszystkie wystąpienia
+w kolejce <code>char[0]</code> na <code>char[1]</code>.</li>
+<li><code>HQIOCDEL</code> – Usuwa co trzeci element z kolejki, zaczynając operację od
+początku kolejki (numerując elementy kolejki od 1, usuwamy elementy
+o numerach 3, 6, 9, …). Rozmiar bufora powinien pozostać bez zmian.</li>
+</ul>
 
-Stała MSG_SIZE jest zdefiniowana w dostarczanym przez nas pliku nagłówkowym ioc_hello_queue.h. Zastrzegamy możliwość zmiany wartości tej stałej w testach.
+<p>Stała <code>MSG_SIZE</code> jest zdefiniowana w dostarczanym przez nas pliku
+nagłówkowym <code>ioc_hello_queue.h</code>. Zastrzegamy możliwość zmiany wartości tej
+stałej w testach.</p>
 
-Wykonanie funkcji lseek nie powinno powodować zmian w działaniu urządzenia.
+<p>Wykonanie funkcji <code>lseek</code> nie powinno powodować zmian w działaniu urządzenia.</p>
 
-Ponadto urządzenie powinno zachowywać aktualny stan w przypadku przeprowadzenia jego aktualizacji poleceniem service update oraz w przypadku restartu poleceniem service restart.
+<p>Ponadto urządzenie powinno zachowywać aktualny stan w przypadku przeprowadzenia
+jego aktualizacji poleceniem <code>service update</code> oraz w przypadku restartu
+poleceniem <span style="color:red">service restart</span>.</p>
 
-Rozwiązanie powinno składać się z pojedynczego pliku hello_queue.c. Plik hello_queue.c wraz z dostarczonymi przez nas plikami Makefile i hello_queue.h zostanie umieszczony w katalogu /usr/src/minix/drivers/hello_queue. Ponadto w katalogach /usr/include/sys oraz /usr/src/minix/include/sys zostanie zostanie umieszczony plik ioc_hello_queue.h. W pliku /etc/system.conf umieszczony zostanie poniższy wpis:
+<p>Rozwiązanie powinno składać się z pojedynczego pliku <code>hello_queue.c</code>.
+Plik <code>hello_queue.c</code> wraz z dostarczonymi przez nas plikami <code>Makefile</code>
+i <code>hello_queue.h</code> zostanie umieszczony
+w katalogu <code>/usr/src/minix/drivers/hello_queue</code>.
+Ponadto w katalogach <code>/usr/include/sys</code> oraz <code>/usr/src/minix/include/sys</code>
+zostanie zostanie umieszczony plik <code>ioc_hello_queue.h</code>.
+W pliku <code>/etc/system.conf</code> umieszczony zostanie poniższy wpis:</p>
 
-service hello_queue
+<pre><code>service hello_queue
 {
         system
                 IRQCTL          # 19
@@ -41,10 +83,12 @@ service hello_queue
         ;
         uid 0;
 };
+</code></pre>
 
-Sterownik będzie kompilowany za pomocą dostarczonego przez nas Makefile. W katalogu /usr/src/minix/drivers/hello_queue zostaną wykonane polecenia:
+<p>Sterownik będzie kompilowany za pomocą dostarczonego przez nas <code>Makefile</code>.
+W katalogu <code>/usr/src/minix/drivers/hello_queue</code> zostaną wykonane polecenia:</p>
 
-make clean
+<pre><code>make clean
 make
 make install
 
@@ -53,13 +97,20 @@ mknod /dev/hello_queue c 17 0
 service up /service/hello_queue -dev /dev/hello_queue
 service update /service/hello_queue
 service down hello_queue
+</code></pre>
 
-Przykład użycia z terminala:
+<p>Przykład użycia z terminala:</p>
 
-# cat /dev/hello_queue
+<pre><code># cat /dev/hello_queue
 xyzxyzxyzxyzxyzxyzxyzxyzxyzxyzxyzxyzxyzxyzxyzxyzxyzxyzxyzxyzx
-# echo "abcabcabcabc" > /dev/hello_queue
+# echo "abcabcabcabc" &gt; /dev/hello_queue
 # cat /dev/hello_queue
 abcabcabcabc
 
-Przykłady użycia funkcji ioctl dostarczamy w pliku ioc_example.c.
+</code></pre>
+
+<p>Przykłady użycia funkcji <code>ioctl</code> dostarczamy w pliku <code>ioc_example.c</code>.</p>
+
+<p>Rozwiązanie należy oddawać przez Moodle.
+Ewentualne pytania również należy zadawać poprzez udostępnione tam forum.</p>
+</div>
