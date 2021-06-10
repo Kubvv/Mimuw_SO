@@ -93,22 +93,5 @@ Rozwiązanie będzie kompilowane poleceniami:</p>
 <pre><code>nasm -f elf64 -w+all -w+error -o diakrytynizator.o diakrytynizator.asm
 ld --fatal-warnings -o diakrytynizator diakrytynizator.o
 </code></pre>
-
-<h2>Ocenianie</h2>
-
-<p>Oceniane będą poprawność i szybkość działania programu, zajętość pamięci
-(rozmiary poszczególnych sekcji), styl kodowania, komentarze. Wystawienie oceny
-może też być uzależnione od osobistego wyjaśnienia szczegółów działania programu
-prowadzącemu zajęcia.</p>
-
-<p>Tradycyjny styl programowania w asemblerze polega na rozpoczynaniu etykiet od
-pierwszej kolumny, mnemoników od dziewiątej kolumny, a listy argumentów od
-siedemnastej kolumny. Inny akceptowalny styl prezentowany jest w przykładach
-pokazywanych na zajęciach. Kod powinien być dobrze skomentowany, co oznacza
-między innymi, że każda procedura powinna być opatrzona informacją, co robi,
-jak przekazywane są do niej parametry, jak przekazywany jest jej wynik, jakie
-rejestry modyfikuje. To samo dotyczy makr. Komentarza wymagają także wszystkie
-kluczowe lub nietrywialne linie wewnątrz procedur lub makr. W przypadku
-asemblera nie jest przesadą komentowanie prawie każdej linii kodu, ale należy
-jak ognia unikać komentarzy typu „zwiększenie wartości rejestru rax o 1”.</p>
+  
 </span></span></div>
