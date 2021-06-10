@@ -1,2 +1,2 @@
 # Mimuw_SO
-All assignments from operating systems
+All assignments for mimuw's operating systems.
