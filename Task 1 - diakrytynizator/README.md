@@ -1,71 +1,114 @@
-Diakrytynizator
+<div role="main"><span id="maincontent"></span><h2>Zadanie 1</h2><div id="intro" class="box py-3 generalbox boxaligncenter"><div class="no-overflow"><span class="filter_mathjaxloader_equation"><span class="nolink"><h2>Diakrytynizator</h2>
 
-Zaimplementuj w asemblerze x86_64 program, który czyta ze standardowego wejścia tekst, modyfikuje go w niżej opisany sposób, a wynik wypisuje na standardowe wyjście. Do kodowania tekstu używamy UTF-8, patrz https://pl.wikipedia.org/wiki/UTF-8. Program nie zmienia znaków o wartościach unicode z przedziału od 0x00 do 0x7F. Natomiast każdy znak o wartości unicode większej od 0x7F przekształca na znak, którego wartość unicode wyznacza się za pomocą niżej opisanego wielomianu.
-Wielomian diakrytynizujący
+<p>Zaimplementuj w asemblerze x86_64 program, który czyta ze standardowego wejścia
+tekst, modyfikuje go w niżej opisany sposób, a wynik wypisuje na standardowe
+wyjście. Do kodowania tekstu używamy UTF-8, patrz
+<a href="https://pl.wikipedia.org/wiki/UTF-8">https://pl.wikipedia.org/wiki/UTF-8</a>.
+Program nie zmienia znaków o wartościach unicode z przedziału od <code>0x00</code>
+do <code>0x7F</code>. Natomiast każdy znak o wartości unicode większej od <code>0x7F</code>
+przekształca na znak, którego wartość unicode wyznacza się za pomocą niżej
+opisanego wielomianu.</p>
 
-Wielomian diakrytynizujący definiuje się przez parametry wywołania diakrytynizatora:
+<h2>Wielomian diakrytynizujący</h2>
 
-./diakrytynizator a0 a1 a2 ... an
+<p>Wielomian diakrytynizujący definiuje się przez parametry wywołania
+diakrytynizatora:</p>
 
-jako:
+<pre><code>./diakrytynizator a0 a1 a2 ... an
+</code></pre>
 
-w(x) = an * x^n + ... + a2 * x^2 + a1 * x + a0
+<p>jako:</p>
 
-Współczynniki wielomianu są nieujemnymi liczbami całkowitymi podawanymi przy podstawie dziesięć. Musi wystąpić przynajmniej parametr a0.
+<pre><code>w(x) = an * x^n + ... + a2 * x^2 + a1 * x + a0
+</code></pre>
 
-Obliczanie wartości wielomianu wykonuje się modulo 0x10FF80. W tekście znak o wartości unicode x zastępuje się znakiem o wartości unicode w(x - 0x80) + 0x80.
-Zakończenie programu i obsługa błędów
+<p>Współczynniki wielomianu są nieujemnymi liczbami całkowitymi podawanymi
+przy podstawie dziesięć. Musi wystąpić przynajmniej parametr <code>a0</code>.</p>
 
-Program kwituje poprawne zakończenia działania, zwracając kod 0. Po wykryciu błędu program kończy się, zwracając kod 1.
+<p>Obliczanie wartości wielomianu wykonuje się modulo <code>0x10FF80</code>.
+W tekście znak o wartości unicode <code>x</code> zastępuje się znakiem o wartości
+unicode <code>w(x - 0x80) + 0x80</code>.</p>
 
-Program powinien sprawdzać poprawność parametrów wywołania i danych wejściowych. Przyjmujemy, że poprawne są znaki UTF-8 o wartościach unicode od 0 do 0x10FFFF, kodowane na co najwyżej 4 bajtach i poprawny jest wyłącznie najkrótszy możliwy sposób zapisu.
-Przykłady użycia
+<h2>Zakończenie programu i obsługa błędów</h2>
 
-Polecenie
+<p>Program kwituje poprawne zakończenia działania, zwracając kod 0.
+Po wykryciu błędu program kończy się, zwracając kod 1.</p>
 
-echo "Zażółć gęślą jaźń…" | ./diakrytynizator 0 1; echo $?
+<p>Program powinien sprawdzać poprawność parametrów wywołania i danych wejściowych.
+Przyjmujemy, że poprawne są znaki UTF-8 o wartościach unicode od <code>0</code>
+do <code>0x10FFFF</code>, kodowane na co najwyżej 4 bajtach i poprawny jest wyłącznie
+najkrótszy możliwy sposób zapisu.</p>
 
-wypisuje
+<h2>Przykłady użycia</h2>
 
-Zażółć gęślą jaźń…
+<p>Polecenie</p>
+
+<pre><code>echo "Zażółć gęślą jaźń…" | ./diakrytynizator 0 1; echo $?
+</code></pre>
+
+<p>wypisuje</p>
+
+<pre><code>Zażółć gęślą jaźń…
 0
+</code></pre>
 
-Polecenie
+<p>Polecenie</p>
 
-echo "Zażółć gęślą jaźń…" | ./diakrytynizator 133; echo $?
+<pre><code>echo "Zażółć gęślą jaźń…" | ./diakrytynizator 133; echo $?
+</code></pre>
 
-wypisuje
+<p>wypisuje</p>
 
-Zaąąąą gąąlą jaąąą
+<pre><code>Zaąąąą gąąlą jaąąą
 0
+</code></pre>
 
-Polecenie
+<p>Polecenie</p>
 
-echo "ŁOŚ" | ./diakrytynizator 1075041 623420 1; echo $?
+<pre><code>echo "ŁOŚ" | ./diakrytynizator 1075041 623420 1; echo $?
+</code></pre>
 
-wypisuje
+<p>wypisuje</p>
 
-„O”
+<pre><code>„O”
 0
+</code></pre>
 
-Polecenie
+<p>Polecenie</p>
 
-echo -e "abc\n\x80" | ./diakrytynizator 7; echo $?
+<pre><code>echo -e "abc\n\x80" | ./diakrytynizator 7; echo $?
+</code></pre>
 
-wypisuje
+<p>wypisuje</p>
 
-abc
+<pre><code>abc
 1
+</code></pre>
 
-Oddawanie rozwiązania
+<h2>Oddawanie rozwiązania</h2>
 
-Jako rozwiązanie należy wstawić w Moodle plik o nazwie diakrytynizator.asm. Rozwiązanie będzie kompilowane poleceniami:
+<p>Jako rozwiązanie należy wstawić w Moodle plik o nazwie <code>diakrytynizator.asm</code>.
+Rozwiązanie będzie kompilowane poleceniami:</p>
 
-nasm -f elf64 -w+all -w+error -o diakrytynizator.o diakrytynizator.asm
+<pre><code>nasm -f elf64 -w+all -w+error -o diakrytynizator.o diakrytynizator.asm
 ld --fatal-warnings -o diakrytynizator diakrytynizator.o
+</code></pre>
 
-Ocenianie
+<h2>Ocenianie</h2>
 
-Oceniane będą poprawność i szybkość działania programu, zajętość pamięci (rozmiary poszczególnych sekcji), styl kodowania, komentarze. Wystawienie oceny może też być uzależnione od osobistego wyjaśnienia szczegółów działania programu prowadzącemu zajęcia.
+<p>Oceniane będą poprawność i szybkość działania programu, zajętość pamięci
+(rozmiary poszczególnych sekcji), styl kodowania, komentarze. Wystawienie oceny
+może też być uzależnione od osobistego wyjaśnienia szczegółów działania programu
+prowadzącemu zajęcia.</p>
 
-Tradycyjny styl programowania w asemblerze polega na rozpoczynaniu etykiet od pierwszej kolumny, mnemoników od dziewiątej kolumny, a listy argumentów od siedemnastej kolumny. Inny akceptowalny styl prezentowany jest w przykładach pokazywanych na zajęciach. Kod powinien być dobrze skomentowany, co oznacza między innymi, że każda procedura powinna być opatrzona informacją, co robi, jak przekazywane są do niej parametry, jak przekazywany jest jej wynik, jakie rejestry modyfikuje. To samo dotyczy makr. Komentarza wymagają także wszystkie kluczowe lub nietrywialne linie wewnątrz procedur lub makr. W przypadku asemblera nie jest przesadą komentowanie prawie każdej linii kodu, ale należy jak ognia unikać komentarzy typu „zwiększenie wartości rejestru rax o 1”.
+<p>Tradycyjny styl programowania w asemblerze polega na rozpoczynaniu etykiet od
+pierwszej kolumny, mnemoników od dziewiątej kolumny, a listy argumentów od
+siedemnastej kolumny. Inny akceptowalny styl prezentowany jest w przykładach
+pokazywanych na zajęciach. Kod powinien być dobrze skomentowany, co oznacza
+między innymi, że każda procedura powinna być opatrzona informacją, co robi,
+jak przekazywane są do niej parametry, jak przekazywany jest jej wynik, jakie
+rejestry modyfikuje. To samo dotyczy makr. Komentarza wymagają także wszystkie
+kluczowe lub nietrywialne linie wewnątrz procedur lub makr. W przypadku
+asemblera nie jest przesadą komentowanie prawie każdej linii kodu, ale należy
+jak ognia unikać komentarzy typu „zwiększenie wartości rejestru rax o 1”.</p>
+</span></span></div>
