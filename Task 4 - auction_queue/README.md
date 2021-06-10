@@ -41,20 +41,20 @@ Należy zadbać o to, aby zwykłym procesom nie był przydzielany priorytet <cod
 
   <li>Nową funkcję systemową: <code>int setbid(int bid)</code>.
 
-      Jeśli wartość parametru jest dodatnia, to szeregowanie procesu zostanie
-      zmienione na algorytm <q>lowest unique bid</q> z ofertą równą <code>bid</code>.
-      Wartość 0 oznacza, że proces rezygnuje z szeregowania <q>lowest unique bid</q> i
-      wraca do szeregowania domyślnego.<br>
+  Jeśli wartość parametru jest dodatnia, to szeregowanie procesu zostanie
+  zmienione na algorytm <q>lowest unique bid</q> z ofertą równą <code>bid</code>.
+  Wartość 0 oznacza, że proces rezygnuje z szeregowania <q>lowest unique bid</q> i
+  wraca do szeregowania domyślnego.<br>
 
-      Funkcja powinna przekazywać jako wynik 0, jeśli metoda szeregowania
-      została zmieniona pomyślnie, a −1 w przeciwnym przypadku. Jeśli wartość
-      parametru nie jest prawidłowa (ujemna lub większa niż
-      <code>MAX_BID = 100</code>), to <code>errno</code> przyjmuje wartość
-      <code>EINVAL</code>. Jeśli proces, który chce zmienić metodę szeregowania
-      na <q>lowest unique bid</q>, jest już szeregowany zgodnie z tym algorytmem, to
-      <code>errno</code> przyjmuje wartość <code>EPERM</code>. Podobnie powinno się
-      stać, gdy proces, który chce zrezygnować z szeregowania <q>lowest unique bid</q>,
-      wcale nie jest nim szeregowany.</li>
+  Funkcja powinna przekazywać jako wynik 0, jeśli metoda szeregowania
+  została zmieniona pomyślnie, a −1 w przeciwnym przypadku. Jeśli wartość
+  parametru nie jest prawidłowa (ujemna lub większa niż
+  <code>MAX_BID = 100</code>), to <code>errno</code> przyjmuje wartość
+  <code>EINVAL</code>. Jeśli proces, który chce zmienić metodę szeregowania
+  na <q>lowest unique bid</q>, jest już szeregowany zgodnie z tym algorytmem, to
+  <code>errno</code> przyjmuje wartość <code>EPERM</code>. Podobnie powinno się
+  stać, gdy proces, który chce zrezygnować z szeregowania <q>lowest unique bid</q>,
+  wcale nie jest nim szeregowany.</li>
 
   <li>Bezpośrednio za nagłówkiem każdej funkcji,
     która została dodana lub zmieniona, należy dodać komentarz
