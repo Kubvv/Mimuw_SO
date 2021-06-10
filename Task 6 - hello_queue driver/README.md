@@ -1,4 +1,4 @@
- <div role="main"><span id="maincontent"></span><h2>Zadanie 6</h2><div id="intro" class="box py-3 generalbox boxaligncenter"><div class="no-overflow"><p><span style="color:red">Update: 2.06. Zmiany na czerwono (refresh zamienione na restart)</span>.</p>
+ <div role="main"><span id="maincontent"></span><h2>Zadanie 6</h2><div id="intro" class="box py-3 generalbox boxaligncenter"><div class="no-overflow">
 
 <p>Biorąc za punkt wyjścia MINIX-owe sterowniki urządzeń umieszczone w katalogu
 <code>/usr/src/minix/drivers/examples</code>, zaimplementuj sterownik urządzenia
@@ -110,7 +110,4 @@ abcabcabcabc
 </code></pre>
 
 <p>Przykłady użycia funkcji <code>ioctl</code> dostarczamy w pliku <code>ioc_example.c</code>.</p>
-
-<p>Rozwiązanie należy oddawać przez Moodle.
-Ewentualne pytania również należy zadawać poprzez udostępnione tam forum.</p>
 </div>
