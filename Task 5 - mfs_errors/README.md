@@ -200,15 +200,5 @@ zadaniu 3. Łatka będzie aplikowana przez umieszczenie jej w katalogu <code>/</
 kopii MINIX-a i wykonanie polecenia <code>patch -p1 &lt; ab123456.patch</code>. Należy zadbać,
 aby łatka zawierała tylko niezbędne różnice. Na Moodle należy umieścić tylko
 łatkę ze zmianami.</p>
-
-<h2>Ocenianie</h2>
-
-<p>Oceniana będą zarówno poprawność, jak i styl rozwiązania. Podstawą do oceny
-rozwiązania będą testy automatyczne sprawdzające poprawność implementacji oraz
-przejrzenie kodu przez sprawdzającego. Za poprawną i w dobrym stylu
-implementację funkcjonalności opisanych w punktach (A), (B) i (C) rozwiązanie
-otrzyma odpowiednio: 2 pkt., 1 pkt i 2 pkt. Rozwiązanie, w którym łatka nie
-nakłada się poprawnie, które nie kompiluje się lub powoduje <em>kernel panic</em>
-podczas uruchamiania, otrzyma 0 pkt.</p>
     
 </div></div>
