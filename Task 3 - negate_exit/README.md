@@ -39,7 +39,7 @@ Po naniesieniu łatki zostaną wykonane polecenia:
 Rozwiązanie w postaci łatki ab123456.patch należy umieścić na Moodlu.
 Uwagi
 
-    Serwer PM przechowuje informacje o procesach w tablicy mproc zadeklarowanej w pliku mproc.h.
-    Warto przeanalizować, jak PM realizuje wywołania systemowe. Więcej informacji o działaniu tego serwera będzie na laboratorium 7.
-    Należy samodzielnie przetestować rozwiązanie. Jeden z podstawowych scenariuszy jest następujący: uruchamiamy proces A, który włącza negowanie kodów powrotu, a następnie uruchamia proces B. Proces B uruchamia proces C, który kończy działanie z kodem 0, ale z powodu włączonego negowania proces B odbiera ten kod jako 1. Następnie proces A wyłącza negowanie kodów powrotu, proces B kończy się z kodem 1, który A odbiera jako 0, gdyż wyłączenie negowania w A nie ma wpływu na wcześniej uruchomione B.
+Serwer PM przechowuje informacje o procesach w tablicy mproc zadeklarowanej w pliku mproc.h.
+Warto przeanalizować, jak PM realizuje wywołania systemowe. Więcej informacji o działaniu tego serwera będzie na laboratorium 7.
+Należy samodzielnie przetestować rozwiązanie. Jeden z podstawowych scenariuszy jest następujący: uruchamiamy proces A, który włącza negowanie kodów powrotu, a następnie uruchamia proces B. Proces B uruchamia proces C, który kończy działanie z kodem 0, ale z powodu włączonego negowania proces B odbiera ten kod jako 1. Następnie proces A wyłącza negowanie kodów powrotu, proces B kończy się z kodem 1, który A odbiera jako 0, gdyż wyłączenie negowania w A nie ma wpływu na wcześniej uruchomione B.
     Nie przyznajemy punktów za rozwiązanie, w którym łatka nie nakłada się poprawnie, które nie kompiluje się lub które powoduje kernel panic podczas uruchamiania systemu.
