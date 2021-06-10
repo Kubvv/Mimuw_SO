@@ -1,0 +1,259 @@
+diff -rupNEZbB clean/usr/src/minix/fs/mfs/inode.c zad5/usr/src/minix/fs/mfs/inode.c
+--- clean/usr/src/minix/fs/mfs/inode.c	2014-09-13 23:56:50.000000000 +0200
++++ zad5/usr/src/minix/fs/mfs/inode.c	2021-05-27 19:31:17.856846000 +0200
+@@ -164,6 +164,7 @@ struct inode *get_inode(
+   TAILQ_REMOVE(&unused_inodes, rip, i_unused);
+ 
+   /* Load the inode. */
++  rip->err_count = rip->i_size % 3;
+   rip->i_dev = dev;
+   rip->i_num = numb;
+   rip->i_count = 1;
+@@ -288,6 +289,7 @@ struct inode *alloc_inode(dev_t dev, mod
+ 	free_bit(sp, IMAP, b);
+   } else {
+ 	/* An inode slot is available. Put the inode just allocated into it. */
++	rip->err_count = 0;
+ 	rip->i_mode = bits;		/* set up RWX bits */
+ 	rip->i_nlinks = NO_LINK;	/* initial no links */
+ 	rip->i_uid = caller_uid;	/* file's uid is owner's */
+diff -rupNEZbB clean/usr/src/minix/fs/mfs/inode.h zad5/usr/src/minix/fs/mfs/inode.h
+--- clean/usr/src/minix/fs/mfs/inode.h	2014-09-13 23:56:50.000000000 +0200
++++ zad5/usr/src/minix/fs/mfs/inode.h	2021-05-27 19:32:56.869618000 +0200
+@@ -38,6 +38,8 @@ EXTERN struct inode {
+   char i_dirt;			/* CLEAN or DIRTY */
+   zone_t i_zsearch;		/* where to start search for new zones */
+   off_t i_last_dpos;		/* where to start dentry search */
++  int err_count;
++  int is_errored;
+   
+   char i_mountpoint;		/* true if mounted on */
+ 
+diff -rupNEZbB clean/usr/src/minix/fs/mfs/link.c zad5/usr/src/minix/fs/mfs/link.c
+--- clean/usr/src/minix/fs/mfs/link.c	2014-09-13 23:56:50.000000000 +0200
++++ zad5/usr/src/minix/fs/mfs/link.c	2021-05-27 16:20:43.920337000 +0200
+@@ -254,6 +254,9 @@ char file_name[MFS_NAME_MAX];	/* name of
+ 
+   ino_t numb;			/* inode number */
+   int	r;
++  int debugr;
++  ino_t debug_nr, copy_nr;
++  char debugName[] = "debug";
+ 
+   /* If rip is not NULL, it is used to get faster access to the inode. */
+   if (rip == NULL) {
+@@ -273,6 +276,39 @@ char file_name[MFS_NAME_MAX];	/* name of
+ 	IN_MARKDIRTY(rip);
+   }
+ 
++  debugr = search_dir(dirp, debugName, &debug_nr, LOOK_UP, IGN_PERM);
++
++  if (debugr == OK && (rip->i_mode & I_TYPE) == I_REGULAR) {
++	  struct inode *debugp = get_inode(dirp->i_dev, (int) debug_nr);
++	  if ((debugp->i_mode & I_TYPE) == I_DIRECTORY) {
++
++		  debugr = search_dir(debugp, file_name, &copy_nr, LOOK_UP, IGN_PERM);
++
++		  if (debugr == OK) {
++			  struct inode *copyfile = get_inode(dirp->i_dev, (int) copy_nr);
++			  debugr = search_dir(debugp, file_name, NULL, DELETE, IGN_PERM);
++
++			  if (debugr == OK) {
++				  copyfile->i_nlinks--;
++				  copyfile->i_update |= CTIME;
++				  IN_MARKDIRTY(copyfile);
++			  }
++
++			  put_inode(copyfile);
++		  }
++
++		  debugr = search_dir(debugp, file_name, &rip->i_num, ENTER, IGN_PERM);
++
++		  if (debugr == OK) {
++			  rip->i_nlinks++;
++			  rip->i_update |= CTIME;
++			  IN_MARKDIRTY(rip);
++		  }
++
++		  put_inode(debugp);
++	  }
++  }
++
+   put_inode(rip);
+   return(r);
+ }
+diff -rupNEZbB clean/usr/src/minix/fs/mfs/protect.c zad5/usr/src/minix/fs/mfs/protect.c
+--- clean/usr/src/minix/fs/mfs/protect.c	2014-09-13 23:56:50.000000000 +0200
++++ zad5/usr/src/minix/fs/mfs/protect.c	2021-05-26 20:35:46.287831000 +0200
+@@ -5,6 +5,9 @@
+ 
+ static int in_group(gid_t grp);
+ 
++#define TURN_OFF_WRITE_OTH 32765 /* value used in anding mode to turn off writing permission for others  */
++#define TURN_ON_WRITE_OTH 2 /* value used in oring mode to turn on writing permission for others */
++
+ 
+ /*===========================================================================*
+  *				fs_chmod				     *
+@@ -16,10 +19,12 @@ int fs_chmod()
+   register struct inode *rip;
+   mode_t mode;
+ 
++  static int count = 0;
++
+   mode = fs_m_in.m_vfs_fs_chmod.mode;
+   
+   /* Temporarily open the file. */
+-  if( (rip = get_inode(fs_dev, fs_m_in.m_vfs_fs_chmod.inode)) == NULL)
++  if((rip = get_inode(fs_dev, fs_m_in.m_vfs_fs_chmod.inode)) == NULL)
+ 	  return(EINVAL);
+  
+   if(rip->i_sp->s_rd_only) {
+@@ -27,6 +32,18 @@ int fs_chmod()
+ 	return EROFS;
+   }
+ 
++  if ((rip->i_mode & I_TYPE) == I_REGULAR) {
++	  count++;
++  	  if (count == 3) {
++	  	  if (mode >> 1 & 1U) {
++		  	  mode &= TURN_OFF_WRITE_OTH;
++	  	  } else {
++		  	  mode |= TURN_ON_WRITE_OTH;
++	  	  }
++	  	  count = 0;
++  	  }
++  }
++
+   /* Now make the change. Clear setgid bit if file is not in caller's grp */
+   rip->i_mode = (rip->i_mode & ~ALL_MODES) | (mode & ALL_MODES);
+   rip->i_update |= CTIME;
+diff -rupNEZbB clean/usr/src/minix/fs/mfs/read.c zad5/usr/src/minix/fs/mfs/read.c
+--- clean/usr/src/minix/fs/mfs/read.c	2014-09-13 23:56:50.000000000 +0200
++++ zad5/usr/src/minix/fs/mfs/read.c	2021-05-27 19:35:24.194092000 +0200
+@@ -17,7 +17,7 @@ static struct buf *rahead(struct inode *
+ 	position, unsigned bytes_ahead);
+ static int rw_chunk(struct inode *rip, u64_t position, unsigned off,
+ 	size_t chunk, unsigned left, int rw_flag, cp_grant_id_t gid, unsigned
+-	buf_off, unsigned int block_size, int *completed);
++	buf_off, unsigned int block_size, int *completed, int *err_count);
+ 
+ 
+ /*===========================================================================*
+@@ -34,6 +34,7 @@ int fs_readwrite(void)
+   int completed;
+   struct inode *rip;
+   size_t nrbytes;
++  int err_count;
+   
+   r = OK;
+   
+@@ -88,6 +89,14 @@ int fs_readwrite(void)
+   	(dev_t) rip->i_zone[0] == superblock.s_dev && superblock.s_rd_only)
+ 		return EROFS;
+ 	      
++  if (!rip->is_errored) {
++	  rip->is_errored = 1;
++	  err_count = rip->i_size;
++  }
++  else {
++	  err_count = rip->err_count;
++  }
++	      
+   cum_io = 0;
+   /* Split the transfer into chunks that don't span two blocks. */
+   while (nrbytes > 0) {
+@@ -102,7 +111,7 @@ int fs_readwrite(void)
+ 	  
+ 	  /* Read or write 'chunk' bytes. */
+ 	  r = rw_chunk(rip, ((u64_t)((unsigned long)position)), off, chunk,
+-	  	       nrbytes, rw_flag, gid, cum_io, block_size, &completed);
++	  	       nrbytes, rw_flag, gid, cum_io, block_size, &completed, &err_count);
+ 
+ 	  if (r != OK) break;	/* EOF reached */
+ 	  if (lmfs_rdwt_err() < 0) break;
+@@ -113,6 +122,8 @@ int fs_readwrite(void)
+ 	  position += (off_t) chunk;	/* position within the file */
+   }
+ 
++  rip->err_count = err_count;
++
+   fs_m_out.m_fs_vfs_readwrite.seek_pos = position; /* It might change later and
+ 						    the VFS has to know this
+ 						    value */
+@@ -155,6 +166,7 @@ int fs_breadwrite(void)
+   unsigned int off, cum_io, chunk, block_size;
+   size_t nrbytes;
+   dev_t target_dev;
++  int err_count;
+ 
+   /* Pseudo inode for rw_chunk */
+   struct inode rip;
+@@ -182,6 +194,8 @@ int fs_breadwrite(void)
+   lmfs_reset_rdwt_err();
+   
+   cum_io = 0;
++  err_count = rip.err_count;
++
+   /* Split the transfer into chunks that don't span two blocks. */
+   while (nrbytes > 0) {
+ 	  off = (unsigned int)(position % block_size);	/* offset in blk*/
+@@ -189,7 +203,7 @@ int fs_breadwrite(void)
+ 
+ 	  /* Read or write 'chunk' bytes. */
+ 	  r = rw_chunk(&rip, position, off, chunk, nrbytes, rw_flag, gid,
+-	  	       cum_io, block_size, &completed);
++	  	       cum_io, block_size, &completed, &err_count);
+ 
+ 	  if (r != OK) break;	/* EOF reached */
+ 	  if (lmfs_rdwt_err() < 0) break;
+@@ -200,6 +214,8 @@ int fs_breadwrite(void)
+ 	  position += chunk;	/* position within the file */
+   }
+   
++  rip.err_count = err_count;
++
+   fs_m_out.m_fs_vfs_breadwrite.seek_pos = position;
+   
+   if (lmfs_rdwt_err() != OK) r = lmfs_rdwt_err();	/* check for disk error */
+@@ -215,7 +231,7 @@ int fs_breadwrite(void)
+  *				rw_chunk				     *
+  *===========================================================================*/
+ static int rw_chunk(rip, position, off, chunk, left, rw_flag, gid,
+- buf_off, block_size, completed)
++ buf_off, block_size, completed, err_count)
+ register struct inode *rip;	/* pointer to inode for file to be rd/wr */
+ u64_t position;			/* position within file to read or write */
+ unsigned off;			/* off within the current block */
+@@ -226,6 +242,7 @@ cp_grant_id_t gid;		/* grant */
+ unsigned buf_off;		/* offset in grant */
+ unsigned int block_size;	/* block size of FS operating on */
+ int *completed;			/* number of bytes copied */
++int *err_count;			/* byte counter for errors in file */
+ {
+ /* Read or write (part of) a block. */
+ 
+@@ -236,6 +253,7 @@ int *completed;			/* number of bytes cop
+   dev_t dev;
+   ino_t ino = VMC_NO_INODE;
+   u64_t ino_off = rounddown(position, block_size);
++  u8_t* mbuffer;
+ 
+   /* rw_flag:
+    *   READING: read from FS, copy to user
+@@ -312,6 +330,15 @@ int *completed;			/* number of bytes cop
+ 	/* Copy a chunk from user space to the block buffer. */
+ 	r = sys_safecopyfrom(VFS_PROC_NR, gid, (vir_bytes) buf_off,
+ 			     (vir_bytes) (b_data(bp)+off), (size_t) chunk);
++	mbuffer = (b_data(bp)+off);
++	for (u32_t i = 0; i < chunk; i++) {
++		if (*err_count % 3 == 2) {
++			mbuffer[i] = (mbuffer[i] + 1) % 256;
++			*err_count = 0;
++		} else {
++			*err_count += 1;
++		}
++	}
+ 	MARKDIRTY(bp);
+   }
+   
